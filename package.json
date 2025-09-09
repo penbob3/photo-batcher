@@ -32,7 +32,15 @@
     "vite": "^5.4.20"
   },
   "dependencies": {
+    "async": "^3.2.6",
     "electron-squirrel-startup": "^1.0.1",
-    "vue": "^3.5.21"
+    "exif-reader": "^2.0.2",
+    "exifreader": "^4.31.2",
+    "sharp": "^0.34.3",
+    "tiff": "^7.1.1",
+    "tiff.js": "^1.0.0",
+    "ts-exif-parser": "^0.2.2",
+    "vue": "^3.5.21",
+    "xmldom": "^0.6.0"
   }
 }

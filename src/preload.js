@@ -1,2 +1,7 @@
-// See the Electron documentation for details on how to use preload scripts:
-// https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
+const { contextBridge, ipcRenderer } = require('electron')
+
+contextBridge.exposeInMainWorld('electronAPI', {
+    openFolder: () => ipcRenderer.invoke('dialog:openFolder'),
+    readFolder: (path) => ipcRenderer.invoke('files:readFolder', path),
+    getImage: (path) => ipcRenderer.invoke('files:getImage', path)
+})

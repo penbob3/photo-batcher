@@ -1,7 +1,7 @@
 <template>
-    <div id="container" class="roboto-300">
+    <div id="container">
         <div class="spacer"></div>
-        <div v-for="options,idx in menuOptions" @click="selectMenuOption(idx)" :class="'option ' + (selectedMenuOption == idx ? 'selected' : '')">{{ options }}</div>
+        <div v-for="option,idx in menuOptions" @click="selectMenuOption(idx)" :class="'option ' + (selectedMenuOption == idx ? 'selected' : '')">{{ option.title }}</div>
     </div>
 </template>
 

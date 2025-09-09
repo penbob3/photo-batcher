@@ -1,19 +1,32 @@
 <template>
-    <PageSwitcher :menuOptions="menuOptions"></PageSwitcher>
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
+    <PageSwitcher :menuOptions="menuOptions" @menuChange="(idx) => selectedMenuOption = idx"></PageSwitcher>
+    <component :is="menuOptions[selectedMenuOption].component"></component>
 </template>
   
 <script>
     import PageSwitcher from './components/PageSwitcher.vue'
+    import PhotoBrowser from './components/PhotoBrowser.vue'
+    import PhotoAnalyzer from './components/PhotoAnalyzer.vue'
 
     export default {
         components: {
-            PageSwitcher
+            PageSwitcher,
+            PhotoBrowser,
+            PhotoAnalyzer
         },
         data() {
             return {
-                menuOptions: ["Browser", "Review"]
+                selectedMenuOption: 0,
+                menuOptions: [
+                    {
+                        title: "Browse",
+                        component: PhotoBrowser
+                    },
+                    {
+                        title: "Analyze",
+                        component: PhotoAnalyzer
+                    }
+                ]
             }
         }
     }
