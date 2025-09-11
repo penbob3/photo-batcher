@@ -19,8 +19,8 @@
                 console.log(this.selectedFolder)
                 this.folderFiles = await window.electronAPI.readFolder(this.selectedFolder)
                 console.log(this.folderFiles)
-                let image = await window.electronAPI.getImage("C:\\Users\\plazm\\Pictures\\FurryCon!\\goodens\\DSC_3308.NEF")
-                console.log(image)
+                //let image = await window.electronAPI.getImage("C:\\Users\\plazm\\Pictures\\FurryCon!\\goodens\\DSC_3308.NEF")
+                //console.log(image)
             }
         }
     }
