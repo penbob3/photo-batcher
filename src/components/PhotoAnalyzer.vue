@@ -1,3 +1,11 @@
 <template>
-    Analyze!
+    
 </template>
+
+<script>
+
+</script>
+
+<style scoped>
+
+</style>

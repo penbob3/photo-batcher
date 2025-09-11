@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 import path from 'node:path'
 import started from 'electron-squirrel-startup'
 import * as fs from 'fs'
+import * as util from 'util'
 const { performance } = require('perf_hooks')
 import { ExifTool } from "exiftool-vendored"
 const exiftool = new ExifTool({
@@ -10,6 +11,8 @@ const exiftool = new ExifTool({
   streamFlushMillis: 10,
 })
 const ProgressBar = require('electron-progressbar')
+
+const readFilePr = util.promisify(fs.readFile)
 
 async function handleFolderOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] })
@@ -31,39 +34,12 @@ async function getRawImage(thispath) {
       await exiftool.extractPreview(thispath, thumbnailpath)
       if (tags.Orientation == 8) { await exiftool.write(thumbnailpath, { Orientation: 'Rotate 270 CW' }) }
     }
-    return { exifTags: tags, thumbnailPath: thumbnailpath }
+    let imageB64 = await readFilePr(thumbnailpath, {encoding: 'base64'})
+    return { exifTags: tags, thumbnailB64: imageB64 }
   } catch(e) {
     console.log(e)
     return null
   }
-}
-
-async function getRawImages(files) {
-  const filesFiltered = files.filter((file) => { return file.split(".").pop().toUpperCase() == "NEF" })
-  let exifList = []
-  var progressBar = new ProgressBar({
-    indeterminate: false,
-    text: 'Loading RAW Files...',
-    detail: 'Wait...',
-    initialValue: 0,
-    maxValue: filesFiltered.length
-  })
-  progressBar
-  .on('progress', function(value) {
-    progressBar.detail = `Loaded ${value} of ${progressBar.getOptions().maxValue} RAW files...`
-  })
-  .on('completed', function() {
-    console.info(`completed...`)
-    progressBar.detail = 'RAW Files Loaded!'
-  })
-  for (const file of filesFiltered) {
-    let exifTags = await getRawImage(file)
-    if(!progressBar.isCompleted()){
-      progressBar.value += 1
-    }
-    if (exifTags) { exifList.push(exifTags) }
-  }
-  return exifList
 }
 
 async function getRawImagesParallel(files) {
@@ -135,7 +111,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   ipcMain.handle('dialog:openFolder', handleFolderOpen)
   ipcMain.handle('files:readFolder', handleReadFolder)
-  //ipcMain.handle('files:getImage', handleGetImage)
+  ipcMain.handle('files:getImage', handleGetImage)
   createWindow();
 
   // On OS X it's common to re-create a window in the app when the
