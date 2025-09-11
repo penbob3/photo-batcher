@@ -4,14 +4,12 @@ import started from 'electron-squirrel-startup'
 import * as fs from 'fs'
 const { performance } = require('perf_hooks')
 import { ExifTool } from "exiftool-vendored"
-const exiftool = new ExifTool({})
+const exiftool = new ExifTool({
+  maxProcs: 8,
+  minDelayBetweenSpawnMillis: 0,
+  streamFlushMillis: 10,
+})
 const ProgressBar = require('electron-progressbar')
-
-function* chunks(arr, n) {
-  for (let i = 0; i < arr.length; i += n) {
-    yield arr.slice(i, i + n)
-  }
-}
 
 async function handleFolderOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] })
@@ -52,11 +50,11 @@ async function getRawImages(files) {
   })
   progressBar
   .on('progress', function(value) {
-    progressBar.detail = `Loaded ${value} of ${progressBar.getOptions().maxValue} RAW files...`;
+    progressBar.detail = `Loaded ${value} of ${progressBar.getOptions().maxValue} RAW files...`
   })
   .on('completed', function() {
-    console.info(`completed...`);
-    progressBar.detail = 'RAW Files Loaded!';
+    console.info(`completed...`)
+    progressBar.detail = 'RAW Files Loaded!'
   })
   for (const file of filesFiltered) {
     let exifTags = await getRawImage(file)
@@ -70,20 +68,27 @@ async function getRawImages(files) {
 
 async function getRawImagesParallel(files) {
   try {
-    //let exifList = await async.each(files, getOneImageExif)
-    //let exifList = await getOneImageExif(files[0])
-    const chunkSize = 40
     const filesFiltered = files.filter((file) => { return file.split(".").pop().toUpperCase() == "NEF" })
-    const chunkList = [...chunks(filesFiltered, chunkSize)]
-    let exifList = []
-
-    for (const chunk of chunkList) {
-      let exifChunk = await Promise.all(chunk.map(async file => {
-        return await getRawImage(file)
-      }))
-      exifList.push(...exifChunk)
-    }
-    
+    var progressBar = new ProgressBar({
+      indeterminate: false,
+      text: 'Loading RAW Files...',
+      detail: 'Wait...',
+      initialValue: 0,
+      maxValue: filesFiltered.length
+    })
+    progressBar
+    .on('progress', function(value) {
+      progressBar.detail = `Loaded ${value} of ${progressBar.getOptions().maxValue} RAW files...`
+    })
+    .on('completed', function() {
+      console.info(`completed...`)
+      progressBar.detail = 'RAW Files Loaded!'
+    })
+    let exifList = await Promise.all(filesFiltered.map(async file => {
+      let doneExif = await getRawImage(file)
+      progressBar.value += 1
+      return doneExif
+    }))
     return exifList
   } catch (e) {
     console.log(e)
@@ -93,7 +98,7 @@ async function getRawImagesParallel(files) {
 
 async function handleReadFolder(event, thispath) {
   const folderContents = fs.readdirSync(thispath, { withFileTypes: true })
-  let imageList = await getRawImages(folderContents.map((file) => file.path + '\\' + file.name))
+  let imageList = await getRawImagesParallel(folderContents.map((file) => file.path + '\\' + file.name))
   console.log(imageList)
   return imageList
 }
