@@ -1,7 +1,7 @@
 <template>
-    <PageSwitcher :menuOptions="menuOptions" @menuChange="(idx) => selectedMenuOption = idx"></PageSwitcher>
-    <PhotoBrowser v-show="selectedMenuOption == 0" @photoListLoaded="(list) => photoList = list" @photoSelected="(idx) => selectedPhoto = idx"></PhotoBrowser>
-    <PhotoAnalyzer v-show="selectedMenuOption == 1 "></PhotoAnalyzer>
+    <PageSwitcher :menuOptions="menuOptions" @menuChange="(idx) => selectedMenuOption = idx" :selectedMenuOption="selectedMenuOption"></PageSwitcher>
+    <PhotoBrowser v-show="selectedMenuOption == 0" @photoListLoaded="(list) => photoList = list" @photoSelected="updateSelectedPhoto"></PhotoBrowser>
+    <PhotoAnalyzer v-show="selectedMenuOption == 1" :currentImage="photoList[selectedPhoto]"></PhotoAnalyzer>
 </template>
   
 <script>
@@ -29,8 +29,14 @@
                         component: PhotoAnalyzer
                     }
                 ],
-                photoList: null,
-                selectedPhoto: null
+                photoList: [],
+                selectedPhoto: 0
+            }
+        },
+        methods: {
+            updateSelectedPhoto: function (idx) {
+                this.selectedPhoto = idx
+                this.selectedMenuOption = 1
             }
         }
     }

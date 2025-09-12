@@ -3,6 +3,7 @@ import path from 'node:path'
 import started from 'electron-squirrel-startup'
 import * as fs from 'fs'
 import * as util from 'util'
+import { exec as execCB } from "node:child_process"
 const { performance } = require('perf_hooks')
 import { ExifTool } from "exiftool-vendored"
 const exiftool = new ExifTool({
@@ -13,6 +14,7 @@ const exiftool = new ExifTool({
 const ProgressBar = require('electron-progressbar')
 
 const readFilePr = util.promisify(fs.readFile)
+const exec = util.promisify(execCB)
 
 async function handleFolderOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] })
@@ -77,6 +79,26 @@ async function handleReadFolder(event, thispath) {
   let imageList = await getRawImagesParallel(folderContents.map((file) => file.path + '\\' + file.name))
   console.log(imageList)
   return imageList
+}
+
+async function getFullImage(thispath) {
+  try {
+    let outpath = thispath.split(".").slice(0, -1).join("") + "-full.jpg"
+    let { error, stdout, stderr } = await exec(`magick ${ thispath } -auto-orient -quality 95 ${ outpath }`)
+    if (fs.existsSync(outpath)) {
+      return await readFilePr(outpath, {encoding: 'base64'})
+    } else {
+      throw `File ${ thispath } wasn't converted!!!`
+    }
+  } catch (e) {
+    console.log(e)
+    return null
+  }
+}
+
+async function handleGetImage(event, thispath) {
+  let fullImageB64 = await getFullImage(thispath)
+  return fullImageB64
 }
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.

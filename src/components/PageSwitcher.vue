@@ -8,18 +8,22 @@
 <script>
     export default {
         props: {
-            menuOptions: Array
+            menuOptions: Array,
+            selectedMenuOption: Number
         },
         data() {
             return {
-                selectedMenuOption: 0
+                //selectedMenuOption: 0
             }
         },
         methods: {
             selectMenuOption: function(optionIdx) {
-                this.selectedMenuOption = optionIdx
+                //this.SelectedMenuOption = optionIdx
                 this.$emit('menuChange', optionIdx)
             }
+        },
+        computed: {
+            
         }
     }
 </script>

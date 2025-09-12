@@ -30,7 +30,7 @@
                 } else {
                     window.alert("You didn't pick a folder!")
                 }
-            }
+            },
         }
     }
 </script>
