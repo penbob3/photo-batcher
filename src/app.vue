@@ -5,7 +5,6 @@
 </template>
   
 <script>
-    //<component :is="menuOptions[selectedMenuOption].component"></component>
     import PageSwitcher from './components/PageSwitcher.vue'
     import PhotoBrowser from './components/PhotoBrowser.vue'
     import PhotoAnalyzer from './components/PhotoAnalyzer.vue'

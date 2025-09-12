@@ -4,7 +4,6 @@ import started from 'electron-squirrel-startup'
 import * as fs from 'fs'
 import * as util from 'util'
 import { exec as execCB } from "node:child_process"
-const { performance } = require('perf_hooks')
 import { ExifTool } from "exiftool-vendored"
 const exiftool = new ExifTool({
   maxProcs: 8,
@@ -32,7 +31,6 @@ async function getRawImage(thispath) {
     const tags = await exiftool.read(thispath)
     const thumbnailpath = thispath.split(".").slice(0, -1).join("") + "-thumb.jpg"
     if (!fs.existsSync(thumbnailpath)) {
-      //console.log("being called?")
       await exiftool.extractPreview(thispath, thumbnailpath)
       if (tags.Orientation == 8) { await exiftool.write(thumbnailpath, { Orientation: 'Rotate 270 CW' }) }
     }
